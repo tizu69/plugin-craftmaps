@@ -4,7 +4,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import dev.tizu.craftmaps.CraftMaps;
 
 public class ThisPlugin extends JavaPlugin {
-	public static ThisPlugin instance;
+	private static ThisPlugin instance;
+
+	public static ThisPlugin i() {
+		return instance;
+	}
 
 	@Override
 	public void onEnable() {

@@ -7,16 +7,16 @@ website: https://tizu.dev
 api-version: "1.21.5"
 
 permissions:
-  craftmaps.auth:
-    description: Authenticate to CraftMaps
-    default: true
-  craftmaps.create:
-    description: Allow creating content on maps
-    default: true
-    children:
-      craftmaps.create.street:
-        description: Allow creating streets
+    craftmaps.auth:
+        description: Authenticate to CraftMaps
         default: true
-      craftmaps.create.poi:
-        description: Allow creating points of interest (buisnesses, parks, etc.)
+    craftmaps.create:
+        description: Allow creating content on maps
         default: true
+        children:
+            craftmaps.create.street:
+                description: Allow creating streets
+                default: true
+            craftmaps.create.poi:
+                description: Allow creating points of interest (buisnesses, parks, etc.)
+                default: true
