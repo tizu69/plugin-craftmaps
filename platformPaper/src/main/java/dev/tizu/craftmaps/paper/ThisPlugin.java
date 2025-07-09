@@ -5,14 +5,19 @@ import dev.tizu.craftmaps.CraftMaps;
 
 public class ThisPlugin extends JavaPlugin {
 	private static ThisPlugin instance;
+	private CraftMaps cm;
 
 	public static ThisPlugin i() {
 		return instance;
 	}
 
+	public CraftMaps getCM() {
+		return cm;
+	}
+
 	@Override
 	public void onEnable() {
 		instance = this;
-		CraftMaps.test();
+		cm = new CraftMaps(this.getLogger());
 	}
 }
