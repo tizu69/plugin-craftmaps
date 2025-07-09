@@ -5,4 +5,4 @@ plugins {
 rootProject.name = "CraftMaps"
 
 include("common")
-include("ext-paper")
+include("platformPaper")
