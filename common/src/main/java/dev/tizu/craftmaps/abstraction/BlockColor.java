@@ -62,5 +62,11 @@ public enum BlockColor {
 	WARPED_WART_BLOCK,
 	DEEPSLATE,
 	RAW_IRON,
-	GLOW_LICHEN,
+	GLOW_LICHEN;
+
+	public static BlockColor of(int index) {
+		if (index < 0 || index >= values().length)
+			return NONE;
+		return values()[index];
+	}
 }
