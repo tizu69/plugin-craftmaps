@@ -12,13 +12,15 @@ public class ThisPlugin extends JavaPlugin {
 		return instance;
 	}
 
-	public CraftMaps getCM() {
-		return cm;
+	public static CraftMaps cm() {
+		return instance.cm;
 	}
 
 	@Override
 	public void onEnable() {
 		instance = this;
 		cm = new CraftMaps(this.getLogger());
+
+		this.getServer().getPluginManager().registerEvents(new MapListener(), this);
 	}
 }
