@@ -2,6 +2,7 @@ package dev.tizu.craftmaps;
 
 import java.util.logging.Logger;
 
+import dev.tizu.craftmaps.api.ApiChunk;
 import io.javalin.Javalin;
 
 public class CraftMaps {
@@ -10,7 +11,13 @@ public class CraftMaps {
 
 	public CraftMaps(Logger logger) {
 		this.logger = logger;
-		server = Javalin.create();
+
+		var apiChunk = new ApiChunk(this);
+		server = Javalin.create(cfg -> {
+			cfg.showJavalinBanner = false;
+		})
+				.get("/{world}/{x}/{z}", apiChunk::getChunk);
+
 		logger.info("Initializing new CraftMaps instance");
 	}
 

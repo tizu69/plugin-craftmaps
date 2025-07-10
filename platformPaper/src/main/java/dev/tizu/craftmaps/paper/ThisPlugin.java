@@ -20,7 +20,7 @@ public class ThisPlugin extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 		cm = new CraftMaps(this.getLogger());
-
 		this.getServer().getPluginManager().registerEvents(new MapListener(), this);
+		cm.startWeb(8080);
 	}
 }
