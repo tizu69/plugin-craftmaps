@@ -16,7 +16,7 @@ public class CraftMaps {
 		server = Javalin.create(cfg -> {
 			cfg.showJavalinBanner = false;
 		})
-				.get("/{world}/{x}/{z}", apiChunk::getChunk);
+				.get("/api/{world}/{x}/{z}", apiChunk::getChunk);
 
 		logger.info("Initializing new CraftMaps instance");
 	}
