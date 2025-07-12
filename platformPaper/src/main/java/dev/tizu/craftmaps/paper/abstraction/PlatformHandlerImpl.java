@@ -8,8 +8,15 @@ import dev.tizu.craftmaps.abstraction.PlatformHandler;
 public class PlatformHandlerImpl implements PlatformHandler {
 	@Override
 	public Chunk getChunkAt(ChunkPosition pos) {
+		return getChunkAt(pos, false);
+	}
+
+	@Override
+	public Chunk getChunkAt(ChunkPosition pos, boolean generateIfAbsent) {
 		var world = ThisPlugin.i().getServer().getWorld(pos.world());
 		if (world == null)
+			return null;
+		if (!world.isChunkGenerated(pos.x(), pos.z()) && !generateIfAbsent)
 			return null;
 		var chunk = world.getChunkAt(pos.x(), pos.z());
 		return new ChunkImpl(chunk);

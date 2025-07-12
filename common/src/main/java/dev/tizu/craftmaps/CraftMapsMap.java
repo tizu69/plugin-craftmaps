@@ -17,7 +17,14 @@ public class CraftMapsMap {
 	}
 
 	public Chunk getChunk(ChunkPosition pos) {
-		return chunks.get(pos);
+		var chunk = chunks.get(pos);
+		if (Math.abs(pos.x()) > 1875000 || Math.abs(pos.z()) > 1875000)
+			return null;
+		if (chunk == null) {
+			chunk = parent.plat().getChunkAt(pos);
+			setChunk(pos, chunk);
+		}
+		return chunk;
 	}
 
 	public void setChunk(ChunkPosition pos, Chunk data) {
