@@ -3,6 +3,7 @@ package dev.tizu.craftmaps.paper;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import dev.tizu.craftmaps.CraftMaps;
+import dev.tizu.craftmaps.paper.abstraction.PlatformHandlerImpl;
 
 public class ThisPlugin extends JavaPlugin {
 	private static ThisPlugin instance;
@@ -19,7 +20,7 @@ public class ThisPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		cm = new CraftMaps(this.getLogger());
+		cm = new CraftMaps(this.getLogger(), new PlatformHandlerImpl());
 		this.getServer().getPluginManager().registerEvents(new MapListener(), this);
 		cm.startWeb(8080);
 	}

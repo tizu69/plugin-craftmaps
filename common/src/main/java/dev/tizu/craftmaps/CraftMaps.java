@@ -2,15 +2,18 @@ package dev.tizu.craftmaps;
 
 import java.util.logging.Logger;
 
+import dev.tizu.craftmaps.abstraction.PlatformHandler;
 import dev.tizu.craftmaps.api.ApiChunk;
 import io.javalin.Javalin;
 
 public class CraftMaps {
 	protected Logger logger;
 	private Javalin server;
+	private PlatformHandler platformHandler;
 
-	public CraftMaps(Logger logger) {
+	public CraftMaps(Logger logger, PlatformHandler platformHandler) {
 		this.logger = logger;
+		this.platformHandler = platformHandler;
 
 		var apiChunk = new ApiChunk(this);
 		server = Javalin.create(cfg -> {
@@ -27,6 +30,10 @@ public class CraftMaps {
 
 	public void startWeb(int port) {
 		server.start(port);
+	}
+
+	public PlatformHandler plat() {
+		return platformHandler;
 	}
 
 	// #region API

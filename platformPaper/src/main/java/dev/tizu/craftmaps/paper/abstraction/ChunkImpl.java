@@ -14,10 +14,6 @@ public class ChunkImpl implements Chunk {
 	private ChunkPosition pos;
 	private Block[][] blocks = Block.generateDefault();
 
-	public ChunkImpl(ChunkPosition pos) {
-		this.pos = pos;
-	}
-
 	public ChunkImpl(org.bukkit.Chunk chunk) {
 		pos = new ChunkPosition(chunk.getX(), chunk.getZ(), chunk.getWorld().getName());
 		var world = chunk.getWorld();
