@@ -7,6 +7,8 @@ public interface Chunk {
 
 	void setAt(BlockPosition pos, Block block);
 
+	Block[][] getBlocks();
+
 	/** Coordinates of the chunk */
 	public static record ChunkPosition(int x, int z, String world) {
 		public boolean isWithin(BlockPosition pos) {
