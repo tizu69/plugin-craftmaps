@@ -18,20 +18,13 @@
 	--color-*: initial;
 	/* text colors */
 	--text-color-black: #000000;
-	--text-color-dark-blue: #0000aa;
-	--text-color-dark-green: #00aa00;
-	--text-color-dark-aqua: #00aaaa;
-	--text-color-dark-red: #aa0000;
-	--text-color-dark-purple: #aa00aa;
 	--text-color-gold: #ffaa00;
-	--text-color-gray: #aaaaaa;
-	--text-color-dark-gray: #555555;
+	--text-color-gray: #3f3f3f;
+	--text-color-light-gray: #808080;
 	--text-color-blue: #5555ff;
 	--background-color-text-blue: #5555ff;
-	--text-color-green: #55ff55;
-	--text-color-aqua: #55ffff;
-	--text-color-red: #ff5555;
-	--text-color-light-purple: #ff55ff;
+	--text-color-green: #00ff00;
+	--text-color-red: #df5050;
 	--text-color-yellow: #ffff55;
 	--text-color-white: #ffffff;
 
@@ -51,7 +44,7 @@
 	--bgc-width: calc(var(--spacing) * 4);
 	border-image: url('-') 4 / var(--bgc-width) repeat;
 	border-radius: calc(var(--bgc-width) * 2);
-	padding: calc(var(--bgc-width));
+	padding: calc(var(--bgc-width) * 1.5);
 }
 @utility bgc--action {
 	@apply bgc--generic;
