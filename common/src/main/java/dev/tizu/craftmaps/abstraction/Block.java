@@ -1,18 +1,27 @@
 package dev.tizu.craftmaps.abstraction;
 
+import dev.tizu.craftmaps.utils.StringConversion;
+
 public class Block {
-	private String name;
+	private String id;
 	private BlockColor color;
 	private int y;
 
-	public Block(String name, BlockColor color, int y) {
-		this.name = name;
+	public Block(String id, BlockColor color, int y) {
+		this.id = id;
 		this.color = color;
 		this.y = y;
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	public String getName() {
-		return name;
+		var name = this.id;
+		if (name.contains(":"))
+			name = name.split(":")[1];
+		return StringConversion.camelToTitleCase(name);
 	}
 
 	public BlockColor getColor() {

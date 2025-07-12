@@ -8,7 +8,6 @@ import org.bukkit.map.MapPalette;
 import dev.tizu.craftmaps.abstraction.Block;
 import dev.tizu.craftmaps.abstraction.BlockColor;
 import dev.tizu.craftmaps.abstraction.Chunk;
-import dev.tizu.craftmaps.utils.StringConversion;
 
 public class ChunkImpl implements Chunk {
 	private ChunkPosition pos;
@@ -21,9 +20,9 @@ public class ChunkImpl implements Chunk {
 			for (int z = 0; z < 16; z++) {
 				var block = world.getHighestBlockAt(pos.x() * 16 + x, pos.z() * 16 + z,
 						HeightMap.WORLD_SURFACE);
-				var name = StringConversion.camelToTitleCase(block.getType().name());
 				var color = getMapColor(block.getBlockData().getMapColor());
-				blocks[x][z] = new Block(name, color, block.getY());
+				var id = block.getType().getKey().asString();
+				blocks[x][z] = new Block(id, color, block.getY());
 			}
 	}
 
