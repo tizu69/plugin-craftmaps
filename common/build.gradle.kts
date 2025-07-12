@@ -9,4 +9,7 @@ dependencies {
 }
 
 tasks {
+    "jar" {
+        dependsOn(":commonWeb:pnpmBuild")
+    }
 }

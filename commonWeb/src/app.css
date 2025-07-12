@@ -1,0 +1,110 @@
+@import 'tailwindcss';
+
+@font-face {
+	font-family: 'craftmaps';
+	src: url('/font.woff') format('woff');
+}
+
+:root {
+	@apply bg-[#FF00FF] font-[craftmaps,sans] text-white;
+	font-size: calc(5px * 4);
+	line-height: 1;
+	font-smooth: never;
+	image-rendering: pixelated;
+	-webkit-font-smoothing: none;
+}
+
+@theme {
+	--color-*: initial;
+	/* text colors */
+	--text-color-black: #000000;
+	--text-color-dark-blue: #0000aa;
+	--text-color-dark-green: #00aa00;
+	--text-color-dark-aqua: #00aaaa;
+	--text-color-dark-red: #aa0000;
+	--text-color-dark-purple: #aa00aa;
+	--text-color-gold: #ffaa00;
+	--text-color-gray: #aaaaaa;
+	--text-color-dark-gray: #555555;
+	--text-color-blue: #5555ff;
+	--background-color-text-blue: #5555ff;
+	--text-color-green: #55ff55;
+	--text-color-aqua: #55ffff;
+	--text-color-red: #ff5555;
+	--text-color-light-purple: #ff55ff;
+	--text-color-yellow: #ffff55;
+	--text-color-white: #ffffff;
+
+	--text-*: initial;
+	--text-small: 0.7rem;
+	--text-base: 1rem;
+	--text-big: 1.5rem;
+
+	--spacing: calc(1rem / 7);
+
+	--default-border-width: theme(--spacing);
+	--border-width-2: calc(theme(--default-border-width) * 2);
+	--border-width-3: calc(theme(--default-border-width) * 3);
+}
+
+@utility bgc--generic {
+	--bgc-width: calc(var(--spacing) * 4);
+	border-image: url('-') 4 / var(--bgc-width) repeat;
+	border-radius: calc(var(--bgc-width) * 2);
+	padding: calc(var(--bgc-width));
+}
+@utility bgc--action {
+	@apply bgc--generic;
+	padding: calc(var(--bgc-width) / 2);
+}
+@utility bgc-action {
+	@apply bgc--action;
+	border-image-source: url('/borders/action.png');
+	background-color: #a09172;
+}
+@utility bgc-actionfocus {
+	@apply bgc--action;
+	border-image-source: url('/borders/actionfocus.png');
+	background-color: #7278a0;
+}
+@utility bgc-actionoff {
+	@apply bgc--action;
+	border-image-source: url('/borders/actionoff.png');
+	background-color: #51493a;
+}
+@utility bgc-inset {
+	@apply bgc--generic;
+	border-image-source: url('/borders/inset.png');
+	background-color: #8b8b8b;
+}
+@utility bgc-insetlong {
+	@apply bgc--generic;
+	border-image-source: url('/borders/insetlong.png');
+	background-color: #373737;
+}
+@utility bgc-root {
+	@apply bgc--generic;
+	border-image-source: url('/borders/root.png');
+	background-color: #c6c6c6;
+}
+@utility bgc-tooltip {
+	@apply bgc--generic;
+	border-image-source: url('/borders/tooltip.png');
+	background-color: #100010;
+}
+
+* {
+	text-decoration-thickness: calc(1rem / 9);
+}
+::selection {
+	@apply bg-text-blue text-white;
+}
+#app {
+	@apply h-dvh;
+}
+
+@custom-variant poi (&:hover, &:focus-visible);
+
+@utility input {
+	@apply focus-visible:!outline-none;
+}

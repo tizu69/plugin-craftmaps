@@ -1,10 +1,12 @@
 package dev.tizu.craftmaps;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import dev.tizu.craftmaps.abstraction.PlatformHandler;
 import dev.tizu.craftmaps.api.ApiChunk;
 import io.javalin.Javalin;
+import io.javalin.http.staticfiles.Location;
 
 public class CraftMaps {
 	protected Logger logger;
@@ -18,6 +20,11 @@ public class CraftMaps {
 		var apiChunk = new ApiChunk(this);
 		server = Javalin.create(cfg -> {
 			cfg.showJavalinBanner = false;
+			cfg.staticFiles.add(staticFiles -> {
+				staticFiles.hostedPath = "/";
+				staticFiles.directory = "/cmweb";
+				staticFiles.location = Location.CLASSPATH;
+			});
 		})
 				.get("/api/{world}/{x}/{z}", apiChunk::getChunk);
 

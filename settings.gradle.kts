@@ -4,5 +4,6 @@ plugins {
 
 rootProject.name = "CraftMaps"
 
+include("commonWeb")
 include("common")
 include("platformPaper")
