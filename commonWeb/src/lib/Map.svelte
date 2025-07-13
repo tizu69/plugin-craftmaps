@@ -18,7 +18,7 @@
 		scale: number;
 		pos: { x: number; z: number; world: string };
 	} = $props();
-	const scaleLimit = [0.01, 10];
+	const scaleLimit = [1, 10];
 
 	const display = new Tween({ scale, x: cameraPos.x, z: cameraPos.z });
 	$effect(() => {
@@ -26,8 +26,8 @@
 	});
 
 	let chunks: Record<string, '...' | Block[][]> = $state({});
-	let chunkCache: Record<string, Block[]> = $state({});
 	let canvas = $state<HTMLCanvasElement>();
+	let cachedChunks = $state<Record<string, HTMLCanvasElement>>({});
 
 	let taskQueue = $state<(() => void)[]>([]);
 	onMount(() => {
@@ -36,9 +36,29 @@
 		}, 1);
 	});
 
+	const createChunkImage = (chunkData: Block[][]): HTMLCanvasElement => {
+		const chunkCanvas = document.createElement('canvas');
+		chunkCanvas.width = 16;
+		chunkCanvas.height = 16;
+
+		const ctx = chunkCanvas.getContext('2d', { willReadFrequently: true })!;
+		ctx.clearRect(0, 0, 16, 16);
+
+		for (let x = 0; x < 16; x++) {
+			for (let z = 0; z < 16; z++) {
+				const block = chunkData[x][z];
+				if (!block || block.color == 'NONE') continue;
+
+				ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
+				ctx.fillRect(x, z, 1, 1);
+			}
+		}
+
+		return chunkCanvas;
+	};
 	$effect(() => {
 		if (!canvas) return;
-		const ctx = canvas.getContext('2d')!;
+		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
 		canvas.width = canvas.clientWidth;
 		canvas.height = canvas.clientHeight;
@@ -68,29 +88,42 @@
 			if (!chunks[chunkKey]) {
 				chunks[chunkKey] = '...';
 				taskQueue.push(() => {
-					fetch(`/api/${cameraPos.world}/${chunk.x}/${chunk.z}`)
+					fetch(`/api/${cameraPos.world}/chunk/${chunk.x}/${chunk.z}`)
 						.then((res) => (res.ok ? res.json() : null))
 						.then((data) => {
-							if (data) chunks[chunkKey] = data.blocks;
+							if (!data) return;
+							chunks[chunkKey] = data.blocks;
+							cachedChunks[chunkKey] = createChunkImage(data.blocks);
 						});
 				});
 			}
 
 			const data = chunks[chunkKey];
 			if (data === '...') return;
+			const cached = cachedChunks[chunkKey];
+			if (!cached) return;
 
-			for (let x = 0; x < 16; x++)
-				for (let z = 0; z < 16; z++) {
-					const block = data[x][z];
-					if (!block) continue;
+			const screenX = display.current.scale * (chunk.ix * 16 - 16 - chunkBlock.x);
+			const screenZ = display.current.scale * (chunk.iz * 16 - 16 - chunkBlock.z);
 
-					const screenX = display.current.scale * (x - chunkBlock.x + chunk.ix * 16 - 16);
-					const screenZ = display.current.scale * (z - chunkBlock.z + chunk.iz * 16 - 16);
+			ctx.imageSmoothingEnabled = false;
+			ctx.drawImage(
+				cached,
+				screenX,
+				screenZ,
+				display.current.scale * 16,
+				display.current.scale * 16
+			);
 
-					ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
-					if (chunk.x == 0 && chunk.z == 0) ctx.fillStyle = '#ff0000';
-					ctx.fillRect(screenX, screenZ, display.current.scale, display.current.scale);
-				}
+			if (chunk.x == 0 && chunk.z == 0) {
+				ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+				ctx.fillRect(
+					screenX,
+					screenZ,
+					display.current.scale * 16,
+					display.current.scale * 16
+				);
+			}
 		});
 	});
 
@@ -110,7 +143,7 @@
 	bind:this={canvas}
 	onmousemove={handleMove}
 	onwheel={(e) => {
-		scale = Math.ceil(
+		scale = Math.round(
 			Math.min(Math.max(scale + -e.deltaY / 100, scaleLimit[0]), scaleLimit[1])
 		);
 	}}

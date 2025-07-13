@@ -26,7 +26,6 @@ public class ChunkImpl implements Chunk {
 			}
 	}
 
-	// TODO: this may(?) match the tinted colors too, which is wrong?
 	@SuppressWarnings("removal")
 	private BlockColor getMapColor(org.bukkit.Color c) {
 		var awtColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());

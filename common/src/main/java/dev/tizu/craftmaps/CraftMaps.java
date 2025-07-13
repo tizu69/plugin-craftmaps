@@ -26,7 +26,7 @@ public class CraftMaps {
 				staticFiles.location = Location.CLASSPATH;
 			});
 		})
-				.get("/api/{world}/{x}/{z}", apiChunk::getChunk);
+				.get("/api/{world}/chunk/{x}/{z}", apiChunk::getChunk);
 
 		logger.info("Initializing new CraftMaps instance");
 	}
