@@ -13,6 +13,10 @@
 	image-rendering: pixelated;
 	-webkit-font-smoothing: none;
 }
+* {
+	text-decoration-thickness: calc(1rem / 7);
+	text-underline-offset: calc(1rem / 7);
+}
 
 @theme {
 	--color-*: initial;
@@ -20,10 +24,10 @@
 	--text-color-black: #000000;
 	--text-color-gold: #ffaa00;
 	--text-color-gray: #3f3f3f;
-	--text-color-light-gray: #808080;
+	--text-color-light-gray: #c5c5c5;
 	--text-color-blue: #5555ff;
 	--background-color-text-blue: #5555ff;
-	--text-color-green: #00ff00;
+	--text-color-green: #7efc20;
 	--text-color-red: #df5050;
 	--text-color-yellow: #ffff55;
 	--text-color-white: #ffffff;
@@ -34,6 +38,7 @@
 	--text-big: 1.5rem;
 
 	--spacing: calc(1rem / 7);
+	--text-shadow-*: initial;
 
 	--default-border-width: theme(--spacing);
 	--border-width-2: calc(theme(--default-border-width) * 2);
@@ -48,7 +53,12 @@
 }
 @utility bgc--action {
 	@apply bgc--generic;
-	padding: calc(var(--bgc-width) / 2);
+	padding: calc(var(--bgc-width) / 8);
+}
+@utility bgc--nopad {
+	@apply bgc--generic;
+	border-radius: 0;
+	padding: 0;
 }
 @utility bgc-action {
 	@apply bgc--action;
@@ -66,12 +76,12 @@
 	background-color: #51493a;
 }
 @utility bgc-inset {
-	@apply bgc--generic;
+	@apply bgc--nopad;
 	border-image-source: url('/borders/inset.png');
 	background-color: #8b8b8b;
 }
 @utility bgc-insetlong {
-	@apply bgc--generic;
+	@apply bgc--nopad;
 	border-image-source: url('/borders/insetlong.png');
 	background-color: #373737;
 }
@@ -86,9 +96,10 @@
 	background-color: #100010;
 }
 
-* {
-	text-decoration-thickness: calc(1rem / 9);
+@utility text-shadow {
+	text-shadow: calc(var(--spacing) * 0.8) calc(var(--spacing) * 0.8) var(--text-color-gray);
 }
+
 ::selection {
 	@apply bg-text-blue text-white;
 }
@@ -99,5 +110,6 @@
 @custom-variant poi (&:hover, &:focus-visible);
 
 @utility input {
+	@apply placeholder:text-light-gray;
 	@apply focus-visible:!outline-none;
 }

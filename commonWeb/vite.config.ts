@@ -10,6 +10,7 @@ export default defineConfig({
 			// in dev, proxy /api requests to the API server - the "real" server.
 			// in production, the API server routes the frontend requests, so this is ignored.
 			'/api': { target: 'http://localhost:8080', changeOrigin: true }
-		}
+		},
+		allowedHosts: true
 	}
 });
