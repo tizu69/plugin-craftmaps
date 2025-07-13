@@ -21,12 +21,11 @@
 @theme {
 	--color-*: initial;
 	/* text colors */
-	--text-color-black: #000000;
+	--color-black: #000000;
 	--text-color-gold: #ffaa00;
 	--text-color-gray: #3f3f3f;
 	--text-color-light-gray: #c5c5c5;
-	--text-color-blue: #5555ff;
-	--background-color-text-blue: #5555ff;
+	--color-blue: #5555ff;
 	--text-color-green: #7efc20;
 	--text-color-red: #df5050;
 	--text-color-yellow: #ffff55;
@@ -101,7 +100,7 @@
 }
 
 ::selection {
-	@apply bg-text-blue text-white;
+	@apply bg-blue text-white;
 }
 #app {
 	@apply h-dvh;
