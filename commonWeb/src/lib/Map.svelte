@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { colors } from '$lib';
 	import { onMount } from 'svelte';
+	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import type { BlockColor } from './colors';
 
@@ -20,9 +21,9 @@
 	} = $props();
 	const scaleLimit = [1, 10];
 
-	const display = new Tween({ scale, x: cameraPos.x, z: cameraPos.z });
+	const display = new Tween({ scale }, { easing: expoOut });
 	$effect(() => {
-		display.set({ scale, x: cameraPos.x, z: cameraPos.z });
+		display.set({ scale });
 	});
 
 	let chunks: Record<string, '...' | Block[][]> = $state({});
@@ -32,8 +33,8 @@
 	let taskQueue = $state<(() => void)[]>([]);
 	onMount(() => {
 		setInterval(() => {
-			if (taskQueue.length) taskQueue.shift()!();
-		}, 1);
+			for (let i = 0; i < 4; i++) if (taskQueue.length) taskQueue.shift()!();
+		}, 5);
 	});
 
 	const createChunkImage = (chunkData: Block[][]): HTMLCanvasElement => {
@@ -44,7 +45,7 @@
 		const ctx = chunkCanvas.getContext('2d', { willReadFrequently: true })!;
 		ctx.clearRect(0, 0, 16, 16);
 
-		for (let x = 0; x < 16; x++) {
+		for (let x = 0; x < 16; x++)
 			for (let z = 0; z < 16; z++) {
 				const block = chunkData[x][z];
 				if (!block || block.color == 'NONE') continue;
@@ -52,7 +53,6 @@
 				ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
 				ctx.fillRect(x, z, 1, 1);
 			}
-		}
 
 		return chunkCanvas;
 	};
@@ -66,11 +66,17 @@
 		ctx.fillStyle = '#000000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		const centerChunk = { x: Math.floor(cameraPos.x / 16), z: Math.floor(cameraPos.z / 16) };
-		const chunkBlock = { x: ((cameraPos.x % 16) + 16) % 16, z: ((cameraPos.z % 16) + 16) % 16 };
+		const centerChunk = {
+			x: Math.floor(cameraPos.x / 16),
+			z: Math.floor(cameraPos.z / 16)
+		};
+		const chunkBlock = {
+			x: ((cameraPos.x % 16) + 16) % 16,
+			z: ((cameraPos.z % 16) + 16) % 16
+		};
 		const chunkCount = {
-			x: Math.ceil(canvas.width / scale / 16) + 2,
-			z: Math.ceil(canvas.height / scale / 16) + 2
+			x: Math.ceil(canvas.width / display.current.scale / 16) + 2,
+			z: Math.ceil(canvas.height / display.current.scale / 16) + 2
 		};
 		const topLeftChunk = {
 			x: centerChunk.x - Math.floor(chunkCount.x / 2),
@@ -91,7 +97,7 @@
 					fetch(`/api/${cameraPos.world}/chunk/${chunk.x}/${chunk.z}`)
 						.then((res) => (res.ok ? res.json() : null))
 						.then((data) => {
-							if (!data) return;
+							if (!data) return delete chunks[chunkKey];
 							chunks[chunkKey] = data.blocks;
 							cachedChunks[chunkKey] = createChunkImage(data.blocks);
 						});
@@ -146,10 +152,6 @@
 			Math.min(Math.max(scale + -e.deltaY / 100, scaleLimit[0]), scaleLimit[1])
 		);
 	}}
-	onmousedown={() => {
-		isClicking = true;
-	}}
-	onmouseup={() => {
-		isClicking = false;
-	}}
+	onmousedown={() => (isClicking = true)}
+	onmouseup={() => (isClicking = false)}
 ></canvas>
