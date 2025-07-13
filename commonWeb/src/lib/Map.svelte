@@ -67,10 +67,10 @@
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 		const centerChunk = { x: Math.floor(cameraPos.x / 16), z: Math.floor(cameraPos.z / 16) };
-		const chunkBlock = { x: cameraPos.x % 16, z: cameraPos.z % 16 };
+		const chunkBlock = { x: ((cameraPos.x % 16) + 16) % 16, z: ((cameraPos.z % 16) + 16) % 16 };
 		const chunkCount = {
-			x: Math.ceil(canvas.width / scale / 16) + 1,
-			z: Math.ceil(canvas.height / scale / 16) + 1
+			x: Math.ceil(canvas.width / scale / 16) + 2,
+			z: Math.ceil(canvas.height / scale / 16) + 2
 		};
 		const topLeftChunk = {
 			x: centerChunk.x - Math.floor(chunkCount.x / 2),
