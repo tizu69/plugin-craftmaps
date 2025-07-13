@@ -128,20 +128,19 @@
 	});
 
 	let isClicking = false;
-	const handleMove = (e: MouseEvent) => {
+</script>
+
+<canvas
+	class="size-full"
+	bind:this={canvas}
+	onmousemove={(e) => {
 		if (!isClicking) return;
 		cameraPos = {
 			x: cameraPos.x - e.movementX / scale,
 			z: cameraPos.z - e.movementY / scale,
 			world: cameraPos.world
 		};
-	};
-</script>
-
-<canvas
-	class="size-full"
-	bind:this={canvas}
-	onmousemove={handleMove}
+	}}
 	onwheel={(e) => {
 		scale = Math.round(
 			Math.min(Math.max(scale + -e.deltaY / 100, scaleLimit[0]), scaleLimit[1])
