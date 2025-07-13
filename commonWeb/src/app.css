@@ -2,12 +2,12 @@
 
 @font-face {
 	font-family: 'craftmaps';
-	src: url('/font.woff') format('woff');
+	src: url('/font.ttf') format('truetype');
 }
 
 :root {
 	@apply bg-[#FF00FF] font-[craftmaps,sans] text-white;
-	font-size: calc(5px * 4);
+	font-size: 16px;
 	line-height: 1;
 	font-smooth: never;
 	image-rendering: pixelated;
@@ -29,7 +29,7 @@
 	--text-color-white: #ffffff;
 
 	--text-*: initial;
-	--text-small: 0.7rem;
+	--text-small: 0.75rem;
 	--text-base: 1rem;
 	--text-big: 1.5rem;
 
