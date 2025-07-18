@@ -11,6 +11,15 @@
 		color: BlockColor;
 		y: number;
 	}
+	interface Chunk {
+		pos: {
+			x: number;
+			z: number;
+			world: string;
+		};
+		blocks: Block[][];
+	}
+	type Region = Chunk[][];
 
 	let {
 		scale = $bindable(),
@@ -19,44 +28,56 @@
 		scale: number;
 		pos: { x: number; z: number; world: string };
 	} = $props();
-	const scaleLimit = [1, 10];
+	const maxScale = 16;
 
-	const display = new Tween({ scale }, { easing: expoOut });
+	const display = new Tween(
+		{ scale, x: cameraPos.x, z: cameraPos.x + 100 },
+		{ easing: expoOut, duration: 700 }
+	);
 	$effect(() => {
-		display.set({ scale });
+		display.set({ scale, x: cameraPos.x, z: cameraPos.z });
 	});
 
-	let chunks: Record<string, '...' | Block[][]> = $state({});
+	const CHUNK_SIZE = 16;
+	const REGION_SIZE = 16;
+	const SIZE_PER_REGION = REGION_SIZE * CHUNK_SIZE;
+	let regions: Record<string, null | Region> = $state({});
 	let canvas = $state<HTMLCanvasElement>();
-	let cachedChunks = $state<Record<string, HTMLCanvasElement>>({});
+	let cachedRegions = $state<Record<string, HTMLCanvasElement>>({});
 
 	let taskQueue = $state<(() => void)[]>([]);
 	onMount(() => {
 		setInterval(() => {
-			for (let i = 0; i < 4; i++) if (taskQueue.length) taskQueue.shift()!();
-		}, 5);
+			taskQueue.shift()?.();
+		}, 40);
 	});
 
-	const createChunkImage = (chunkData: Block[][]): HTMLCanvasElement => {
-		const chunkCanvas = document.createElement('canvas');
-		chunkCanvas.width = 16;
-		chunkCanvas.height = 16;
+	const createRegionImage = (region: Region): HTMLCanvasElement => {
+		const regionCanvas = document.createElement('canvas');
+		regionCanvas.width = SIZE_PER_REGION;
+		regionCanvas.height = SIZE_PER_REGION;
 
-		const ctx = chunkCanvas.getContext('2d', { willReadFrequently: true })!;
-		ctx.clearRect(0, 0, 16, 16);
+		const ctx = regionCanvas.getContext('2d', { willReadFrequently: true })!;
+		ctx.clearRect(0, 0, SIZE_PER_REGION, SIZE_PER_REGION);
 
-		for (let x = 0; x < 16; x++)
-			for (let z = 0; z < 16; z++) {
-				const block = chunkData[x][z];
-				if (!block || block.color == 'NONE') continue;
+		for (let cx = 0; cx < REGION_SIZE; cx++)
+			for (let cz = 0; cz < REGION_SIZE; cz++) {
+				ctx.fillStyle = cx % 2 == cz % 2 ? `#1e1e2e` : '#000000';
+				ctx.fillRect(cx * CHUNK_SIZE, cz * CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
 
-				ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
-				ctx.fillRect(x, z, 1, 1);
+				for (let x = 0; x < CHUNK_SIZE; x++)
+					for (let z = 0; z < CHUNK_SIZE; z++) {
+						const block = region[cx]?.[cz]?.blocks?.[x]?.[z];
+						if (!block || block.color == 'NONE') continue;
+
+						ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
+						ctx.fillRect(cx * CHUNK_SIZE + x, cz * CHUNK_SIZE + z, 1, 1);
+					}
 			}
 
-		return chunkCanvas;
+		return regionCanvas;
 	};
-	$effect(() => {
+	const forceRerender = () => {
 		if (!canvas) return;
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
@@ -66,72 +87,64 @@
 		ctx.fillStyle = '#000000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		const centerChunk = {
-			x: Math.floor(cameraPos.x / 16),
-			z: Math.floor(cameraPos.z / 16)
-		};
-		const chunkBlock = {
-			x: ((cameraPos.x % 16) + 16) % 16,
-			z: ((cameraPos.z % 16) + 16) % 16
-		};
-		const chunkCount = {
-			x: Math.ceil(canvas.width / display.current.scale / 16) + 2,
-			z: Math.ceil(canvas.height / display.current.scale / 16) + 2
-		};
-		const topLeftChunk = {
-			x: centerChunk.x - Math.floor(chunkCount.x / 2),
-			z: centerChunk.z - Math.floor(chunkCount.z / 2)
-		};
+		const scale = display.current.scale;
 
-		const visibleChunks: { x: number; z: number; ix: number; iz: number }[] = [];
-		for (let x = 0; x < chunkCount.x; x++)
-			for (let z = 0; z < chunkCount.z; z++)
-				visibleChunks.push({ x: topLeftChunk.x + x, z: topLeftChunk.z + z, ix: x, iz: z });
+		const centerX = Math.floor(display.current.x / SIZE_PER_REGION);
+		const centerZ = Math.floor(display.current.z / SIZE_PER_REGION);
+		const countX = Math.ceil(canvas.width / scale / SIZE_PER_REGION) + 2;
+		const countZ = Math.ceil(canvas.height / scale / SIZE_PER_REGION) + 2;
+		const topLeftX = centerX - Math.floor(countX / 2);
+		const topLeftZ = centerZ - Math.floor(countZ / 2);
+		const screenCenterX = Math.floor(canvas.width / 2);
+		const screenCenterZ = Math.floor(canvas.height / 2);
 
-		visibleChunks.forEach((chunk) => {
-			const chunkKey = `${chunk.x}:${chunk.z}`;
+		const visible: { x: number; z: number; ix: number; iz: number }[] = [];
+		for (let x = 0; x < countX; x++)
+			for (let z = 0; z < countZ; z++)
+				visible.push({ x: topLeftX + x, z: topLeftZ + z, ix: x, iz: z });
 
-			if (!chunks[chunkKey]) {
-				chunks[chunkKey] = '...';
+		visible.forEach((region) => {
+			const key = `${region.x}:${region.z}`;
+
+			if (regions[key] === undefined) {
+				regions[key] = null;
 				taskQueue.push(() => {
-					fetch(`/api/${cameraPos.world}/chunk/${chunk.x}/${chunk.z}`)
-						.then((res) => (res.ok ? res.json() : null))
-						.then((data) => {
-							if (!data) return delete chunks[chunkKey];
-							chunks[chunkKey] = data.blocks;
-							cachedChunks[chunkKey] = createChunkImage(data.blocks);
+					fetch(`/api/${cameraPos.world}/region/${region.x}/${region.z}`).then((res) => {
+						if (res.status == 404) return (regions[key] = null);
+						if (!res.ok) return setTimeout(() => delete regions[key], 10 * 1000);
+						res.json().then((data: Region) => {
+							regions[key] = data;
+							cachedRegions[key] = createRegionImage(data);
 						});
+					});
 				});
 			}
 
-			const data = chunks[chunkKey];
-			if (data === '...') return;
-			const cached = cachedChunks[chunkKey];
+			if (regions[key] === null) return;
+			const cached = cachedRegions[key];
 			if (!cached) return;
 
-			const screenX = display.current.scale * (chunk.ix * 16 - 16 - chunkBlock.x);
-			const screenZ = display.current.scale * (chunk.iz * 16 - 16 - chunkBlock.z);
+			const worldX = region.x * SIZE_PER_REGION;
+			const worldZ = region.z * SIZE_PER_REGION;
+			const screenX = screenCenterX + scale * (worldX - display.current.x);
+			const screenZ = screenCenterZ + scale * (worldZ - display.current.z);
 
 			ctx.imageSmoothingEnabled = false;
 			ctx.drawImage(
 				cached,
 				screenX,
 				screenZ,
-				display.current.scale * 16,
-				display.current.scale * 16
+				scale * SIZE_PER_REGION,
+				scale * SIZE_PER_REGION
 			);
 
-			if (chunk.x == 0 && chunk.z == 0) {
+			if (region.x == 0 && region.z == 0) {
 				ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-				ctx.fillRect(
-					screenX,
-					screenZ,
-					display.current.scale * 16,
-					display.current.scale * 16
-				);
+				ctx.fillRect(screenX, screenZ, scale * SIZE_PER_REGION, scale * SIZE_PER_REGION);
 			}
 		});
-	});
+	};
+	$effect(() => forceRerender());
 
 	let isClicking = false;
 </script>
@@ -148,10 +161,21 @@
 		};
 	}}
 	onwheel={(e) => {
-		scale = Math.round(
-			Math.min(Math.max(scale + -e.deltaY / 100, scaleLimit[0]), scaleLimit[1])
-		);
+		const screenCenter = {
+			x: canvas!.width / 2,
+			z: canvas!.height / 2
+		};
+
+		const worldX = cameraPos.x + (e.clientX - screenCenter.x) / scale;
+		const worldZ = cameraPos.z + (e.clientY - screenCenter.z) / scale;
+		const newScale = Math.round(Math.min(Math.max(scale + Math.sign(-e.deltaY), 1), maxScale));
+		console.log('scale', scale, 'delta', e.deltaY, 'new', newScale);
+
+		cameraPos.x = worldX - (e.clientX - screenCenter.x) / newScale;
+		cameraPos.z = worldZ - (e.clientY - screenCenter.z) / newScale;
+		scale = newScale;
 	}}
 	onmousedown={() => (isClicking = true)}
 	onmouseup={() => (isClicking = false)}
+	onresize={() => forceRerender()}
 ></canvas>

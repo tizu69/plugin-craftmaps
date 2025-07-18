@@ -1,6 +1,5 @@
 package dev.tizu.craftmaps;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 import dev.tizu.craftmaps.abstraction.PlatformHandler;
@@ -26,7 +25,8 @@ public class CraftMaps {
 				staticFiles.location = Location.CLASSPATH;
 			});
 		})
-				.get("/api/{world}/chunk/{x}/{z}", apiChunk::getChunk);
+				.get("/api/{world}/chunk/{x}/{z}", apiChunk::getChunk)
+				.get("/api/{world}/region/{x}/{z}", apiChunk::getRegion);
 
 		logger.info("Initializing new CraftMaps instance");
 	}

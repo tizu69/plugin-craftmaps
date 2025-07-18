@@ -1,9 +1,19 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { colors, Map } from '$lib';
 </script>
 
 <div class="absolute inset-0">
-	<Map pos={{ x: 0, z: 0, world: 'world' }} scale={10} />
+	<Map
+		pos={{
+			// @ts-expect-error idc
+			x: +page.url.searchParams.get('x') || 0,
+			// @ts-expect-error idc
+			z: +page.url.searchParams.get('z') || 0,
+			world: 'world'
+		}}
+		scale={10}
+	/>
 </div>
 
 <div class="bgc-root m-4 w-fit">

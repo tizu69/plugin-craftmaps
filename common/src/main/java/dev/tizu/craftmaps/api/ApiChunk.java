@@ -2,6 +2,7 @@ package dev.tizu.craftmaps.api;
 
 import dev.tizu.craftmaps.CraftMaps;
 import dev.tizu.craftmaps.abstraction.Chunk.ChunkPosition;
+import dev.tizu.craftmaps.abstraction.Chunk.RegionPosition;
 import io.javalin.http.Context;
 
 public class ApiChunk {
@@ -23,5 +24,14 @@ public class ApiChunk {
 		}
 
 		ctx.json(chunk);
+	}
+
+	public void getRegion(Context ctx) {
+		var world = ctx.pathParam("world");
+		var x = Integer.parseInt(ctx.pathParam("x"));
+		var z = Integer.parseInt(ctx.pathParam("z"));
+
+		var region = parent.getMap().getRegion(new RegionPosition(x, z, world));
+		ctx.json(region);
 	}
 }
