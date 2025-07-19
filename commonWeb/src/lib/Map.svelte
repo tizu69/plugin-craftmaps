@@ -55,13 +55,13 @@
 
 		for (let cx = 0; cx < REGION_SIZE; cx++)
 			for (let cz = 0; cz < REGION_SIZE; cz++) {
-				ctx.fillStyle = cx % 2 == cz % 2 ? `#1e1e2e` : '#000000';
-				ctx.fillRect(cx * CHUNK_SIZE, cz * CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+				/* ctx.fillStyle = cx % 2 == cz % 2 ? `#1e1e2e` : '#000000';
+				ctx.fillRect(cx * CHUNK_SIZE, cz * CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE); */
 
 				for (let x = 0; x < CHUNK_SIZE; x++)
 					for (let z = 0; z < CHUNK_SIZE; z++) {
 						const block = region[cx]?.[cz]?.blocks?.[x]?.[z];
-						if (!block || block.color == 'NONE') continue;
+						if (!block) continue;
 
 						ctx.fillStyle = `rgb(${colors.get(block.color).join(',')})`;
 						ctx.fillRect(cx * CHUNK_SIZE + x, cz * CHUNK_SIZE + z, 1, 1);
@@ -100,7 +100,7 @@
 			if (regions[key] === undefined) {
 				regions[key] = null;
 				taskQueue.push(() => {
-					fetch(`/api/w/${cameraPos.world}/region/${region.x}/${region.z}`).then((res) => {
+					fetch(`/api/w/${cameraPos.world}/region/${region.x}:${region.z}`).then((res) => {
 						if (res.status == 404) return (regions[key] = null);
 						if (!res.ok) return setTimeout(() => delete regions[key], 10 * 1000);
 						res.json().then((data: Region) => {
@@ -161,7 +161,7 @@
 
 		const worldX = cam.current.x + (centerX - screenCenterX) / scale.current;
 		const worldZ = cam.current.z + (centerY - screenCenterZ) / scale.current;
-		const newScale = Math.min(Math.max(scale.current + delta, 1), maxScale);
+		const newScale = Math.min(Math.max(scale.current + delta, 1 / 16), maxScale);
 
 		cam.set({
 			x: worldX - (centerX - screenCenterX) / newScale,

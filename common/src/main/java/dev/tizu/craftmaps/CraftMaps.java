@@ -30,8 +30,8 @@ public class CraftMaps {
 			});
 		})
 				.get("/api/worlds", apiServer::getWorlds)
-				.get("/api/w/{world}/chunk/{x}/{z}", apiChunk::getChunk)
-				.get("/api/w/{world}/region/{x}/{z}", apiChunk::getRegion)
+				.get("/api/w/{world}/chunk/{x}:{z}", apiChunk::getChunk)
+				.get("/api/w/{world}/region/{x}:{z}", apiChunk::getRegion)
 				.get("/api/w/{world}/players", apiPlayer::getPlayers);
 
 		logger.info("Initializing new CraftMaps instance");

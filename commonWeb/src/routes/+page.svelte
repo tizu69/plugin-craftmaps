@@ -3,19 +3,7 @@
 	import { colors, Map } from '$lib';
 </script>
 
-<div class="absolute inset-0">
-	<Map
-		pos={{
-			// @ts-expect-error idc
-			x: +page.url.searchParams.get('x') || 0,
-			// @ts-expect-error idc
-			z: +page.url.searchParams.get('z') || 0,
-			world: 'minecraft:overworld'
-		}}
-	/>
-</div>
-
-<div class="bgc-root m-4 w-fit">
+<div class="relative bgc-root m-4 w-fit z-10">
 	<div class="flex justify-between pb-3">
 		<p class="text-gray">Chess Chest</p>
 		<div class="size-7" style="background: rgb({colors.get('DIAMOND', 0).join(',')});"></div>
@@ -46,3 +34,16 @@
 		{/each}
 	</div>
 </div>
+
+<div class="absolute inset-0">
+	<Map
+		pos={{
+			// @ts-expect-error idc
+			x: +page.url.searchParams.get('x') || 0,
+			// @ts-expect-error idc
+			z: +page.url.searchParams.get('z') || 0,
+			world: 'minecraft:overworld'
+		}}
+	/>
+</div>
+
