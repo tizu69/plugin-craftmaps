@@ -12,7 +12,6 @@
 			z: +page.url.searchParams.get('z') || 0,
 			world: 'world'
 		}}
-		scale={10}
 	/>
 </div>
 

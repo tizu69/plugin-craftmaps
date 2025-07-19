@@ -100,7 +100,7 @@
 			if (regions[key] === undefined) {
 				regions[key] = null;
 				taskQueue.push(() => {
-					fetch(`/api/${cameraPos.world}/region/${region.x}/${region.z}`).then((res) => {
+					fetch(`/api/w/${cameraPos.world}/region/${region.x}/${region.z}`).then((res) => {
 						if (res.status == 404) return (regions[key] = null);
 						if (!res.ok) return setTimeout(() => delete regions[key], 10 * 1000);
 						res.json().then((data: Region) => {
