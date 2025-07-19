@@ -22,7 +22,7 @@ public class CraftMapsMap {
 		if (Math.abs(pos.x()) > 1875000 || Math.abs(pos.z()) > 1875000)
 			return null;
 		if (chunk == null) {
-			chunk = parent.plat().getChunkAt(pos);
+			chunk = parent.plat().getChunkAt(pos, true);
 			setChunk(pos, chunk);
 		}
 		return chunk;

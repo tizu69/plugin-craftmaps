@@ -13,16 +13,13 @@ import dev.tizu.craftmaps.positions.ChunkPosition;
 
 public class PlatformHandlerImpl implements PlatformHandler {
 	@Override
-	public CMChunk getChunkAt(ChunkPosition pos) {
-		return getChunkAt(pos, false);
-	}
-
-	@Override
-	public CMChunk getChunkAt(ChunkPosition pos, boolean generateIfAbsent) {
+	public CMChunk getChunkAt(ChunkPosition pos, boolean attemptLoad) {
 		var world = ThisPlugin.i().getServer().getWorld(NamespacedKey.fromString(pos.world()));
 		if (world == null)
 			return null;
-		if (!world.isChunkGenerated(pos.x(), pos.z()) && !generateIfAbsent)
+		if (!world.isChunkLoaded(pos.x(), pos.z()) && !attemptLoad)
+			return null;
+		if (!world.isChunkGenerated(pos.x(), pos.z()))
 			return null;
 		var chunk = world.getChunkAt(pos.x(), pos.z());
 		return new ChunkImpl(chunk);
