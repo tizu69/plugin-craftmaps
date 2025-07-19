@@ -28,7 +28,6 @@ public interface CMChunk {
 
 	public static List<CMBlock> generateDefaultPalette() {
 		var a = new ArrayList<CMBlock>();
-		a.add(new CMBlock("air", BlockColor.NONE, 0));
 		return a;
 	}
 }
