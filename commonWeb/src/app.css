@@ -13,6 +13,9 @@
 	image-rendering: pixelated;
 	-webkit-font-smoothing: none;
 }
+body {
+	overscroll-behavior: contain;
+}
 * {
 	text-decoration-thickness: calc(1rem / 7);
 	text-underline-offset: calc(1rem / 7);

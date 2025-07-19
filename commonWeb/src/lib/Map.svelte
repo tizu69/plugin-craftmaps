@@ -22,21 +22,14 @@
 	type Region = Chunk[][];
 
 	let {
-		scale = $bindable(),
 		pos: cameraPos = $bindable()
 	}: {
-		scale: number;
 		pos: { x: number; z: number; world: string };
 	} = $props();
-	const maxScale = 16;
 
-	const display = new Tween(
-		{ scale, x: cameraPos.x, z: cameraPos.x + 100 },
-		{ easing: expoOut, duration: 700 }
-	);
-	$effect(() => {
-		display.set({ scale, x: cameraPos.x, z: cameraPos.z });
-	});
+	const maxScale = 16;
+	const scale = new Tween(5, { easing: expoOut, duration: 700 });
+	const cam = new Tween({ x: cameraPos.x, z: cameraPos.z }, { easing: expoOut, duration: 700 });
 
 	const CHUNK_SIZE = 16;
 	const REGION_SIZE = 16;
@@ -87,12 +80,10 @@
 		ctx.fillStyle = '#000000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		const scale = display.current.scale;
-
-		const centerX = Math.floor(display.current.x / SIZE_PER_REGION);
-		const centerZ = Math.floor(display.current.z / SIZE_PER_REGION);
-		const countX = Math.ceil(canvas.width / scale / SIZE_PER_REGION) + 2;
-		const countZ = Math.ceil(canvas.height / scale / SIZE_PER_REGION) + 2;
+		const centerX = Math.floor(cam.current.x / SIZE_PER_REGION);
+		const centerZ = Math.floor(cam.current.z / SIZE_PER_REGION);
+		const countX = Math.ceil(canvas.width / scale.current / SIZE_PER_REGION) + 2;
+		const countZ = Math.ceil(canvas.height / scale.current / SIZE_PER_REGION) + 2;
 		const topLeftX = centerX - Math.floor(countX / 2);
 		const topLeftZ = centerZ - Math.floor(countZ / 2);
 		const screenCenterX = Math.floor(canvas.width / 2);
@@ -126,56 +117,97 @@
 
 			const worldX = region.x * SIZE_PER_REGION;
 			const worldZ = region.z * SIZE_PER_REGION;
-			const screenX = screenCenterX + scale * (worldX - display.current.x);
-			const screenZ = screenCenterZ + scale * (worldZ - display.current.z);
+			const screenX = screenCenterX + scale.current * (worldX - cam.current.x);
+			const screenZ = screenCenterZ + scale.current * (worldZ - cam.current.z);
 
 			ctx.imageSmoothingEnabled = false;
 			ctx.drawImage(
 				cached,
 				screenX,
 				screenZ,
-				scale * SIZE_PER_REGION,
-				scale * SIZE_PER_REGION
+				scale.current * SIZE_PER_REGION,
+				scale.current * SIZE_PER_REGION
 			);
 
 			if (region.x == 0 && region.z == 0) {
 				ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-				ctx.fillRect(screenX, screenZ, scale * SIZE_PER_REGION, scale * SIZE_PER_REGION);
+				ctx.fillRect(
+					screenX,
+					screenZ,
+					scale.current * SIZE_PER_REGION,
+					scale.current * SIZE_PER_REGION
+				);
 			}
 		});
 	};
 	$effect(() => forceRerender());
 
 	let isClicking = false;
+	let lastTouch: { x: number; y: number } | null = null;
+	let lastZoomDistance: number | null = null;
+	const onPan = (x: number, y: number, smooth: boolean) => {
+		if (!isClicking) return;
+		cam.set(
+			{
+				x: cam.target.x - x / scale.current,
+				z: cam.target.z - y / scale.current
+			},
+			{ duration: !smooth ? 0 : undefined }
+		);
+	};
+	const onZoom = (delta: number, centerX: number, centerY: number) => {
+		const screenCenterX = canvas!.width / 2;
+		const screenCenterZ = canvas!.height / 2;
+
+		const worldX = cam.current.x + (centerX - screenCenterX) / scale.current;
+		const worldZ = cam.current.z + (centerY - screenCenterZ) / scale.current;
+		const newScale = Math.min(Math.max(scale.current + delta, 1), maxScale);
+
+		cam.set({
+			x: worldX - (centerX - screenCenterX) / newScale,
+			z: worldZ - (centerY - screenCenterZ) / newScale
+		});
+		scale.set(newScale);
+	};
 </script>
 
 <canvas
 	class="size-full"
 	bind:this={canvas}
-	onmousemove={(e) => {
-		if (!isClicking) return;
-		cameraPos = {
-			x: cameraPos.x - e.movementX / scale,
-			z: cameraPos.z - e.movementY / scale,
-			world: cameraPos.world
-		};
+	onmousemove={(e) => onPan(e.movementX, e.movementY, false)}
+	ontouchmove={(e) => {
+		switch (e.touches.length) {
+			case 1:
+				const touch = e.touches[0];
+				onPan(
+					(touch.clientX - lastTouch?.x!) * 2,
+					(touch.clientY - lastTouch?.y!) * 2,
+					true
+				);
+				lastTouch = { x: touch.clientX, y: touch.clientY };
+				break;
+			case 2:
+				const touch1 = e.touches[0];
+				const touch2 = e.touches[1];
+				const dx = touch1.clientX - touch2.clientX;
+				const dy = touch1.clientY - touch2.clientY;
+				const distance = Math.sqrt(dx * dx + dy * dy);
+				const centerX = (touch1.clientX + touch2.clientX) / 2;
+				const centerY = (touch1.clientY + touch2.clientY) / 2;
+				if (lastZoomDistance != null)
+					onZoom((distance - lastZoomDistance) / 10, centerX, centerY);
+				lastZoomDistance = distance;
+				break;
+		}
 	}}
-	onwheel={(e) => {
-		const screenCenter = {
-			x: canvas!.width / 2,
-			z: canvas!.height / 2
-		};
-
-		const worldX = cameraPos.x + (e.clientX - screenCenter.x) / scale;
-		const worldZ = cameraPos.z + (e.clientY - screenCenter.z) / scale;
-		const newScale = Math.round(Math.min(Math.max(scale + Math.sign(-e.deltaY), 1), maxScale));
-		console.log('scale', scale, 'delta', e.deltaY, 'new', newScale);
-
-		cameraPos.x = worldX - (e.clientX - screenCenter.x) / newScale;
-		cameraPos.z = worldZ - (e.clientY - screenCenter.z) / newScale;
-		scale = newScale;
-	}}
+	onwheel={(e) => onZoom(Math.sign(-e.deltaY), e.clientX, e.clientY)}
 	onmousedown={() => (isClicking = true)}
 	onmouseup={() => (isClicking = false)}
+	onmouseleave={() => (isClicking = false)}
+	ontouchstart={(e) => {
+		isClicking = true;
+		lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+	}}
+	ontouchend={() => ((isClicking = false), (lastTouch = null), (lastZoomDistance = null))}
 	onresize={() => forceRerender()}
 ></canvas>
