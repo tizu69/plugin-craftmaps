@@ -1,6 +1,10 @@
 package dev.tizu.craftmaps.paper.abstraction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dev.tizu.craftmaps.abstraction.CMChunk;
+import dev.tizu.craftmaps.abstraction.CMPlayer;
 import dev.tizu.craftmaps.paper.ThisPlugin;
 import dev.tizu.craftmaps.platform.PlatformHandler;
 import dev.tizu.craftmaps.positions.ChunkPosition;
@@ -26,5 +30,13 @@ public class PlatformHandlerImpl implements PlatformHandler {
 	public String[] getWorlds() {
 		return ThisPlugin.i().getServer().getWorlds().stream()
 				.map(w -> w.getName()).toArray(String[]::new);
+	}
+
+	@Override
+	public List<CMPlayer> getPlayers(String world) {
+		var worldData = ThisPlugin.i().getServer().getWorld(world);
+		if (worldData == null)
+			return List.of();
+		return new ArrayList<>(worldData.getPlayers().stream().map(PlayerImpl::new).toList());
 	}
 }
