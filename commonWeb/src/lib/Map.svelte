@@ -4,6 +4,7 @@
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import type { BlockColor, ColorShades } from './colors';
+	import { goto } from '$app/navigation';
 
 	interface Block {
 		name: string;
@@ -63,7 +64,7 @@
 					for (let z = 0; z < CHUNK_SIZE; z++) {
 						const chunk = region[cx]?.[cz];
 						const block = chunk?.blocks?.[x]?.[z];
-						if (!block) continue;
+						if (block === undefined) continue;
 						const current = chunk.palette[block];
 
 						let below = chunk.palette[chunk.blocks[x][z - 1]];
@@ -210,7 +211,14 @@
 		}
 	}}
 	onwheel={(e) => onZoom(Math.sign(-e.deltaY), e.clientX, e.clientY)}
-	onmousedown={() => (isClicking = true)}
+	onmousedown={(e) => {
+		e.preventDefault();
+		if (e.button === 0 || e.button === 1) return (isClicking = true);
+
+		const worldX = Math.floor(cam.current.x + (e.clientX - canvas!.width / 2) / scale.current);
+		const worldZ = Math.floor(cam.current.z + (e.clientY - canvas!.height / 2) / scale.current);
+		goto(`?x=${worldX}&z=${worldZ}`);
+	}}
 	onmouseup={() => (isClicking = false)}
 	onmouseleave={() => (isClicking = false)}
 	ontouchstart={(e) => {
