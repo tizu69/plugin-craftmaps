@@ -10,7 +10,7 @@
 			x: +page.url.searchParams.get('x') || 0,
 			// @ts-expect-error idc
 			z: +page.url.searchParams.get('z') || 0,
-			world: 'world'
+			world: 'minecraft:overworld'
 		}}
 	/>
 </div>
