@@ -1,8 +1,8 @@
 package dev.tizu.craftmaps.api;
 
 import dev.tizu.craftmaps.CraftMaps;
-import dev.tizu.craftmaps.abstraction.Chunk.ChunkPosition;
-import dev.tizu.craftmaps.abstraction.Chunk.RegionPosition;
+import dev.tizu.craftmaps.positions.ChunkPosition;
+import dev.tizu.craftmaps.positions.RegionPosition;
 import io.javalin.http.Context;
 
 public class ApiChunk {

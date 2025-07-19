@@ -2,18 +2,21 @@ package dev.tizu.craftmaps.paper.abstraction;
 
 import java.awt.Color;
 
+import org.bukkit.Chunk;
 import org.bukkit.HeightMap;
 import org.bukkit.map.MapPalette;
 
-import dev.tizu.craftmaps.abstraction.Block;
-import dev.tizu.craftmaps.abstraction.BlockColor;
-import dev.tizu.craftmaps.abstraction.Chunk;
+import dev.tizu.craftmaps.abstraction.CMBlock;
+import dev.tizu.craftmaps.abstraction.CMChunk;
+import dev.tizu.craftmaps.platform.BlockColor;
+import dev.tizu.craftmaps.positions.BlockPosition;
+import dev.tizu.craftmaps.positions.ChunkPosition;
 
-public class ChunkImpl implements Chunk {
+public class ChunkImpl implements CMChunk {
 	private ChunkPosition pos;
-	private Block[][] blocks = Block.generateDefault();
+	private CMBlock[][] blocks = CMBlock.generateDefault();
 
-	public ChunkImpl(org.bukkit.Chunk chunk) {
+	public ChunkImpl(Chunk chunk) {
 		pos = new ChunkPosition(chunk.getX(), chunk.getZ(), chunk.getWorld().getName());
 		var world = chunk.getWorld();
 		for (int x = 0; x < 16; x++)
@@ -22,7 +25,7 @@ public class ChunkImpl implements Chunk {
 						HeightMap.WORLD_SURFACE);
 				var color = getMapColor(block.getBlockData().getMapColor());
 				var id = block.getType().getKey().asString();
-				blocks[x][z] = new Block(id, color, block.getY());
+				blocks[x][z] = new CMBlock(id, color, block.getY());
 			}
 	}
 
@@ -39,17 +42,17 @@ public class ChunkImpl implements Chunk {
 	}
 
 	@Override
-	public Block getAt(BlockPosition pos) {
+	public CMBlock getAt(BlockPosition pos) {
 		return blocks[pos.x()][pos.z()];
 	}
 
 	@Override
-	public void setAt(BlockPosition pos, Block block) {
+	public void setAt(BlockPosition pos, CMBlock block) {
 		blocks[pos.x()][pos.z()] = block;
 	}
 
 	@Override
-	public Block[][] getBlocks() {
+	public CMBlock[][] getBlocks() {
 		return blocks;
 	}
 }

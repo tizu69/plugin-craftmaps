@@ -1,13 +1,14 @@
 package dev.tizu.craftmaps.abstraction;
 
+import dev.tizu.craftmaps.platform.BlockColor;
 import dev.tizu.craftmaps.utils.StringConversion;
 
-public class Block {
+public class CMBlock {
 	private String id;
 	private BlockColor color;
 	private int y;
 
-	public Block(String id, BlockColor color, int y) {
+	public CMBlock(String id, BlockColor color, int y) {
 		this.id = id;
 		this.color = color;
 		this.y = y;
@@ -32,8 +33,8 @@ public class Block {
 		return y;
 	}
 
-	public static Block[][] generateDefault() {
-		Block[][] blocks = new Block[16][16];
+	public static CMBlock[][] generateDefault() {
+		CMBlock[][] blocks = new CMBlock[16][16];
 		for (int x = 0; x < 16; x++)
 			for (int z = 0; z < 16; z++)
 				blocks[x][z] = null;

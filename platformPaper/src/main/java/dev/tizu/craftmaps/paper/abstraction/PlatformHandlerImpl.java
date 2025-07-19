@@ -1,18 +1,18 @@
 package dev.tizu.craftmaps.paper.abstraction;
 
-import dev.tizu.craftmaps.abstraction.Chunk;
-import dev.tizu.craftmaps.abstraction.Chunk.ChunkPosition;
+import dev.tizu.craftmaps.abstraction.CMChunk;
 import dev.tizu.craftmaps.paper.ThisPlugin;
-import dev.tizu.craftmaps.abstraction.PlatformHandler;
+import dev.tizu.craftmaps.platform.PlatformHandler;
+import dev.tizu.craftmaps.positions.ChunkPosition;
 
 public class PlatformHandlerImpl implements PlatformHandler {
 	@Override
-	public Chunk getChunkAt(ChunkPosition pos) {
+	public CMChunk getChunkAt(ChunkPosition pos) {
 		return getChunkAt(pos, false);
 	}
 
 	@Override
-	public Chunk getChunkAt(ChunkPosition pos, boolean generateIfAbsent) {
+	public CMChunk getChunkAt(ChunkPosition pos, boolean generateIfAbsent) {
 		var world = ThisPlugin.i().getServer().getWorld(pos.world());
 		if (world == null)
 			return null;

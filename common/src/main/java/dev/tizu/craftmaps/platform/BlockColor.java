@@ -1,4 +1,4 @@
-package dev.tizu.craftmaps.abstraction;
+package dev.tizu.craftmaps.platform;
 
 public enum BlockColor {
 	NONE,
