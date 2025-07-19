@@ -17,7 +17,7 @@ public class ChunkImpl implements CMChunk {
 	private CMBlock[][] blocks = CMBlock.generateDefault();
 
 	public ChunkImpl(Chunk chunk) {
-		pos = new ChunkPosition(chunk.getX(), chunk.getZ(), chunk.getWorld().getName());
+		pos = new ChunkPosition(chunk.getX(), chunk.getZ(), chunk.getWorld().getKey().asString());
 		var world = chunk.getWorld();
 		for (int x = 0; x < 16; x++)
 			for (int z = 0; z < 16; z++) {

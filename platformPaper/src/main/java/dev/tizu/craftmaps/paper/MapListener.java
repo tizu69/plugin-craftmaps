@@ -15,6 +15,6 @@ public class MapListener implements Listener {
 	public static void onChunkLoaded(ChunkLoadEvent event) {
 		var chunk = event.getChunk();
 		ThisPlugin.cm().getMap().setChunk(new ChunkPosition(chunk.getX(), chunk.getZ(),
-				chunk.getWorld().getName()), new ChunkImpl(chunk));
+				chunk.getWorld().getKey().asString()), new ChunkImpl(chunk));
 	}
 }

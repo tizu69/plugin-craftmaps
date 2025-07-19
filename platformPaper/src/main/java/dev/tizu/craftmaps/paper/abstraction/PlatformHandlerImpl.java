@@ -3,6 +3,8 @@ package dev.tizu.craftmaps.paper.abstraction;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.NamespacedKey;
+
 import dev.tizu.craftmaps.abstraction.CMChunk;
 import dev.tizu.craftmaps.abstraction.CMPlayer;
 import dev.tizu.craftmaps.paper.ThisPlugin;
@@ -17,7 +19,7 @@ public class PlatformHandlerImpl implements PlatformHandler {
 
 	@Override
 	public CMChunk getChunkAt(ChunkPosition pos, boolean generateIfAbsent) {
-		var world = ThisPlugin.i().getServer().getWorld(pos.world());
+		var world = ThisPlugin.i().getServer().getWorld(NamespacedKey.fromString(pos.world()));
 		if (world == null)
 			return null;
 		if (!world.isChunkGenerated(pos.x(), pos.z()) && !generateIfAbsent)
@@ -29,12 +31,12 @@ public class PlatformHandlerImpl implements PlatformHandler {
 	@Override
 	public String[] getWorlds() {
 		return ThisPlugin.i().getServer().getWorlds().stream()
-				.map(w -> w.getName()).toArray(String[]::new);
+				.map(w -> w.getKey().asString()).toArray(String[]::new);
 	}
 
 	@Override
 	public List<CMPlayer> getPlayers(String world) {
-		var worldData = ThisPlugin.i().getServer().getWorld(world);
+		var worldData = ThisPlugin.i().getServer().getWorld(NamespacedKey.fromString(world));
 		if (worldData == null)
 			return List.of();
 		return new ArrayList<>(worldData.getPlayers().stream().map(PlayerImpl::new).toList());

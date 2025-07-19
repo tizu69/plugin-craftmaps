@@ -33,6 +33,6 @@ public class PlayerImpl implements CMPlayer {
 	@Override
 	public Position getPosition() {
 		return new Position((int) player.getX(), (int) player.getY(), (int) player.getZ(),
-				player.getWorld().getName());
+				player.getWorld().getKey().asString());
 	}
 }
