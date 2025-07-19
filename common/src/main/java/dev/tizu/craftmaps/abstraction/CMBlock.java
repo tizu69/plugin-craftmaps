@@ -33,11 +33,21 @@ public class CMBlock {
 		return y;
 	}
 
-	public static CMBlock[][] generateDefault() {
-		CMBlock[][] blocks = new CMBlock[16][16];
-		for (int x = 0; x < 16; x++)
-			for (int z = 0; z < 16; z++)
-				blocks[x][z] = null;
-		return blocks;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CMBlock cmBlock = (CMBlock) o;
+		return id.equals(cmBlock.id) && color == cmBlock.color && y == cmBlock.y;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = id.hashCode();
+		result = 31 * result + color.hashCode();
+		result = 31 * result + y;
+		return result;
 	}
 }

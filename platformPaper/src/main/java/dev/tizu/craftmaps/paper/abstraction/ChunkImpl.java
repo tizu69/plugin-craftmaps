@@ -1,6 +1,7 @@
 package dev.tizu.craftmaps.paper.abstraction;
 
 import java.awt.Color;
+import java.util.List;
 
 import org.bukkit.Chunk;
 import org.bukkit.HeightMap;
@@ -14,7 +15,8 @@ import dev.tizu.craftmaps.positions.ChunkPosition;
 
 public class ChunkImpl implements CMChunk {
 	private ChunkPosition pos;
-	private CMBlock[][] blocks = CMBlock.generateDefault();
+	private int[][] blocks = CMChunk.generateDefaultBlocks();
+	private List<CMBlock> palette = CMChunk.generateDefaultPalette();
 
 	public ChunkImpl(Chunk chunk) {
 		pos = new ChunkPosition(chunk.getX(), chunk.getZ(), chunk.getWorld().getKey().asString());
@@ -25,7 +27,7 @@ public class ChunkImpl implements CMChunk {
 						HeightMap.WORLD_SURFACE);
 				var color = getMapColor(block.getBlockData().getMapColor());
 				var id = block.getType().getKey().asString();
-				blocks[x][z] = new CMBlock(id, color, block.getY());
+				this.setAt(new BlockPosition(x, z), new CMBlock(id, color, block.getY()));
 			}
 	}
 
@@ -43,16 +45,26 @@ public class ChunkImpl implements CMChunk {
 
 	@Override
 	public CMBlock getAt(BlockPosition pos) {
-		return blocks[pos.x()][pos.z()];
+		return palette.get(blocks[pos.x()][pos.z()]);
 	}
 
 	@Override
 	public void setAt(BlockPosition pos, CMBlock block) {
-		blocks[pos.x()][pos.z()] = block;
+		var index = palette.indexOf(block);
+		if (index == -1) {
+			palette.add(block);
+			index = palette.size() - 1;
+		}
+		blocks[pos.x()][pos.z()] = index;
 	}
 
 	@Override
-	public CMBlock[][] getBlocks() {
+	public CMBlock[] getPalette() {
+		return palette.toArray(new CMBlock[0]);
+	}
+
+	@Override
+	public int[][] getBlocks() {
 		return blocks;
 	}
 }
