@@ -1,7 +1,5 @@
 package dev.tizu.craftmaps.platform;
 
-import java.awt.Color;
-
 public enum BlockColor {
 	NONE(0, 0, 0),
 	GRASS(127, 178, 56),
@@ -66,16 +64,20 @@ public enum BlockColor {
 	RAW_IRON(216, 175, 147),
 	GLOW_LICHE(127, 167, 15);
 
-	public final Color color;
+	public final int r;
+	public final int g;
+	public final int b;
 
 	private BlockColor(int r, int g, int b) {
-		this.color = new Color(r, g, b);
+		this.r = r;
+		this.g = g;
+		this.b = b;
 	}
 
-	public static BlockColor of(Color c) {
+	public static BlockColor of(int r, int g, int b) {
 		for (BlockColor blockColor : BlockColor.values())
-			if (blockColor.color.equals(c))
+			if (blockColor.r == r && blockColor.g == g && blockColor.b == b)
 				return blockColor;
-		return NONE;
+		return FIRE;
 	}
 }

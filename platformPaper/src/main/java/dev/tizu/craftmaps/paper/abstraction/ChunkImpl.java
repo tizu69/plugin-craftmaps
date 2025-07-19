@@ -1,9 +1,9 @@
 package dev.tizu.craftmaps.paper.abstraction;
 
-import java.awt.Color;
 import java.util.List;
 
 import org.bukkit.Chunk;
+import org.bukkit.Color;
 
 import dev.tizu.craftmaps.abstraction.CMBlock;
 import dev.tizu.craftmaps.abstraction.CMChunk;
@@ -28,9 +28,8 @@ public class ChunkImpl implements CMChunk {
 			}
 	}
 
-	private BlockColor getMapColor(org.bukkit.Color c) {
-		var awtColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
-		return BlockColor.of(awtColor);
+	private BlockColor getMapColor(Color c) {
+		return BlockColor.of(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
 	@Override
