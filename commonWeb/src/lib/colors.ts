@@ -71,13 +71,13 @@ export const colorShades = {
 	1: 1
 };
 
-export const get = (color: BlockColor, shade: ColorShades = 0): number[] => {
+export const get = (color: BlockColor, shade: ColorShades = 0) => {
 	let shadeMultiplier = colorShades[shade];
 	let unshaded = colors[color];
 
-	return [
+	return `rgb(${[
 		Math.floor(unshaded[0] * shadeMultiplier),
 		Math.floor(unshaded[1] * shadeMultiplier),
 		Math.floor(unshaded[2] * shadeMultiplier)
-	];
+	].join(',')})`;
 };

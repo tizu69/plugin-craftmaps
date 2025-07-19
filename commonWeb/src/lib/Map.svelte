@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import type { BlockColor } from './colors';
+	import type { BlockColor, ColorShades } from './colors';
 
 	interface Block {
 		name: string;
@@ -64,8 +64,13 @@
 						const chunk = region[cx]?.[cz];
 						const block = chunk?.blocks?.[x]?.[z];
 						if (!block) continue;
+						const current = chunk.palette[block];
 
-						ctx.fillStyle = `rgb(${colors.get(chunk.palette[block].color).join(',')})`;
+						let below = chunk.palette[chunk.blocks[x][z - 1]];
+						let shade: ColorShades =
+							!below || below?.y === current.y ? 0 : below?.y < current.y ? 1 : -1;
+
+						ctx.fillStyle = colors.get(current.color, shade);
 						ctx.fillRect(cx * CHUNK_SIZE + x, cz * CHUNK_SIZE + z, 1, 1);
 					}
 			}
