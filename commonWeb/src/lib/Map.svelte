@@ -1,27 +1,10 @@
 <script lang="ts">
-	import { colors } from '$lib';
+	import { c, colors, MapCore } from '$lib';
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import type { BlockColor, ColorShades } from './colors';
 	import { goto } from '$app/navigation';
-
-	interface Block {
-		name: string;
-		id: string;
-		color: BlockColor;
-		y: number;
-	}
-	interface Chunk {
-		pos: {
-			x: number;
-			z: number;
-			world: string;
-		};
-		blocks: number[][];
-		palette: Block[];
-	}
-	type Region = Chunk[][];
 
 	let {
 		pos: cameraPos = $bindable()
@@ -30,15 +13,9 @@
 	} = $props();
 
 	const maxScale = 16;
-	const scale = new Tween(5, { easing: expoOut, duration: 700 });
-	const cam = new Tween({ x: cameraPos.x, z: cameraPos.z }, { easing: expoOut, duration: 700 });
+	let core = $state(new MapCore('minecraft:overworld'));
 
-	const CHUNK_SIZE = 16;
-	const REGION_SIZE = 16;
-	const SIZE_PER_REGION = REGION_SIZE * CHUNK_SIZE;
-	let regions: Record<string, null | Region> = $state({});
 	let canvas = $state<HTMLCanvasElement>();
-	let cachedRegions = $state<Record<string, HTMLCanvasElement>>({});
 
 	let taskQueue = $state<(() => void)[]>([]);
 	onMount(() => {
@@ -47,37 +24,6 @@
 		}, 40);
 	});
 
-	const createRegionImage = (region: Region): HTMLCanvasElement => {
-		const regionCanvas = document.createElement('canvas');
-		regionCanvas.width = SIZE_PER_REGION;
-		regionCanvas.height = SIZE_PER_REGION;
-
-		const ctx = regionCanvas.getContext('2d', { willReadFrequently: true })!;
-		ctx.clearRect(0, 0, SIZE_PER_REGION, SIZE_PER_REGION);
-
-		for (let cx = 0; cx < REGION_SIZE; cx++)
-			for (let cz = 0; cz < REGION_SIZE; cz++) {
-				/* ctx.fillStyle = cx % 2 == cz % 2 ? `#1e1e2e` : '#000000';
-				ctx.fillRect(cx * CHUNK_SIZE, cz * CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE); */
-
-				for (let x = 0; x < CHUNK_SIZE; x++)
-					for (let z = 0; z < CHUNK_SIZE; z++) {
-						const chunk = region[cx]?.[cz];
-						const block = chunk?.blocks?.[x]?.[z];
-						if (block === undefined) continue;
-						const current = chunk.palette[block];
-
-						let below = chunk.palette[chunk.blocks[x][z - 1]];
-						let shade: ColorShades =
-							!below || below?.y === current.y ? 0 : below?.y < current.y ? 1 : -1;
-
-						ctx.fillStyle = colors.get(current.color, shade);
-						ctx.fillRect(cx * CHUNK_SIZE + x, cz * CHUNK_SIZE + z, 1, 1);
-					}
-			}
-
-		return regionCanvas;
-	};
 	const forceRerender = () => {
 		if (!canvas) return;
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
@@ -88,10 +34,10 @@
 		ctx.fillStyle = '#000000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		const centerX = Math.floor(cam.current.x / SIZE_PER_REGION);
-		const centerZ = Math.floor(cam.current.z / SIZE_PER_REGION);
-		const countX = Math.ceil(canvas.width / scale.current / SIZE_PER_REGION) + 2;
-		const countZ = Math.ceil(canvas.height / scale.current / SIZE_PER_REGION) + 2;
+		const centerX = Math.floor(core.cam.current.x / c.REGION_BLOCKS);
+		const centerZ = Math.floor(core.cam.current.z / c.REGION_BLOCKS);
+		const countX = Math.ceil(canvas.width / core.cam.current.scale / c.REGION_BLOCKS) + 2;
+		const countZ = Math.ceil(canvas.height / core.cam.current.scale / c.REGION_BLOCKS) + 2;
 		const topLeftX = centerX - Math.floor(countX / 2);
 		const topLeftZ = centerZ - Math.floor(countZ / 2);
 		const screenCenterX = Math.floor(canvas.width / 2);
@@ -103,40 +49,21 @@
 				visible.push({ x: topLeftX + x, z: topLeftZ + z, ix: x, iz: z });
 
 		visible.forEach((region) => {
-			const key = `${region.x}:${region.z}`;
+			const r = core.getRegion(region.x, region.z);
+			if (!r) return;
 
-			if (regions[key] === undefined) {
-				regions[key] = null;
-				taskQueue.push(() => {
-					fetch(`/api/w/${cameraPos.world}/region/${region.x}:${region.z}`).then(
-						(res) => {
-							if (res.status == 404) return (regions[key] = null);
-							if (!res.ok) return setTimeout(() => delete regions[key], 10 * 1000);
-							res.json().then((data: Region) => {
-								regions[key] = data;
-								cachedRegions[key] = createRegionImage(data);
-							});
-						}
-					);
-				});
-			}
-
-			if (regions[key] === null) return;
-			const cached = cachedRegions[key];
-			if (!cached) return;
-
-			const worldX = region.x * SIZE_PER_REGION;
-			const worldZ = region.z * SIZE_PER_REGION;
-			const screenX = screenCenterX + scale.current * (worldX - cam.current.x);
-			const screenZ = screenCenterZ + scale.current * (worldZ - cam.current.z);
+			const worldX = region.x * c.REGION_BLOCKS;
+			const worldZ = region.z * c.REGION_BLOCKS;
+			const screenX = screenCenterX + core.cam.current.scale * (worldX - core.cam.current.x);
+			const screenZ = screenCenterZ + core.cam.current.scale * (worldZ - core.cam.current.z);
 
 			ctx.imageSmoothingEnabled = false;
 			ctx.drawImage(
-				cached,
+				core.renderRegion(region.x, region.z)!,
 				screenX,
 				screenZ,
-				scale.current * SIZE_PER_REGION,
-				scale.current * SIZE_PER_REGION
+				core.cam.current.scale * c.REGION_BLOCKS,
+				core.cam.current.scale * c.REGION_BLOCKS
 			);
 
 			if (region.x == 0 && region.z == 0) {
@@ -144,8 +71,8 @@
 				ctx.fillRect(
 					screenX,
 					screenZ,
-					scale.current * SIZE_PER_REGION,
-					scale.current * SIZE_PER_REGION
+					core.cam.current.scale * c.REGION_BLOCKS,
+					core.cam.current.scale * c.REGION_BLOCKS
 				);
 			}
 		});
@@ -157,10 +84,11 @@
 	let lastZoomDistance: number | null = null;
 	const onPan = (x: number, y: number, smooth: boolean) => {
 		if (!isClicking) return;
-		cam.set(
+		core.cam.set(
 			{
-				x: cam.target.x - x / scale.current,
-				z: cam.target.z - y / scale.current
+				x: core.cam.target.x - x / core.cam.target.scale,
+				z: core.cam.target.z - y / core.cam.target.scale,
+				scale: core.cam.target.scale
 			},
 			{ duration: !smooth ? 0 : undefined }
 		);
@@ -169,15 +97,15 @@
 		const screenCenterX = canvas!.width / 2;
 		const screenCenterZ = canvas!.height / 2;
 
-		const worldX = cam.current.x + (centerX - screenCenterX) / scale.current;
-		const worldZ = cam.current.z + (centerY - screenCenterZ) / scale.current;
-		const newScale = Math.min(Math.max(scale.current + delta, 1 / 16), maxScale);
+		const worldX = core.cam.current.x + (centerX - screenCenterX) / core.cam.current.scale;
+		const worldZ = core.cam.current.z + (centerY - screenCenterZ) / core.cam.current.scale;
+		const newScale = Math.min(Math.max(core.cam.target.scale + delta, 1 / 16), maxScale);
 
-		cam.set({
+		core.cam.set({
 			x: worldX - (centerX - screenCenterX) / newScale,
-			z: worldZ - (centerY - screenCenterZ) / newScale
+			z: worldZ - (centerY - screenCenterZ) / newScale,
+			scale: newScale
 		});
-		scale.set(newScale);
 	};
 </script>
 
@@ -215,9 +143,12 @@
 		e.preventDefault();
 		if (e.button === 0 || e.button === 1) return (isClicking = true);
 
-		const worldX = Math.floor(cam.current.x + (e.clientX - canvas!.width / 2) / scale.current);
-		const worldZ = Math.floor(cam.current.z + (e.clientY - canvas!.height / 2) / scale.current);
-		goto(`?x=${worldX}&z=${worldZ}`);
+		const pos = core.viewportToWorld(e.offsetX, e.offsetY);
+		const block = core.getBlock(pos[0], pos[1]);
+		if (!block) return
+
+		goto(`?x=${pos[0]}&z=${pos[1]}&block=${block.id}&blockY=${block.y}`);
+		navigator.clipboard.writeText(`/tp ${pos[0]} ${block.y} ${pos[1]}`);
 	}}
 	onmouseup={() => (isClicking = false)}
 	onmouseleave={() => (isClicking = false)}
@@ -226,5 +157,5 @@
 		lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 	}}
 	ontouchend={() => ((isClicking = false), (lastTouch = null), (lastZoomDistance = null))}
-	onresize={() => forceRerender()}
 ></canvas>
+<svelte:window onresize={() => forceRerender()} />

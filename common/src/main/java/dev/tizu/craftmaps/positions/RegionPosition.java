@@ -2,7 +2,7 @@ package dev.tizu.craftmaps.positions;
 
 /** Coordinates of a region. NOT A MINECRAFT-SIZED REGION! */
 public record RegionPosition(int x, int z, String world) {
-	public static final int REGION_SIZE = 16;
+	public static final int REGION_SIZE = 32;
 
 	/** Get the coordinates of the top-left chunk */
 	public ChunkPosition getChunkPositionTL() {
@@ -11,7 +11,8 @@ public record RegionPosition(int x, int z, String world) {
 
 	/** Get the coordinates of the bottom-right chunk */
 	public ChunkPosition getChunkPositionBR() {
-		return new ChunkPosition(x * REGION_SIZE + 31, z * REGION_SIZE + 31, world);
+		return new ChunkPosition(x * REGION_SIZE + REGION_SIZE - 1,
+				z * REGION_SIZE + REGION_SIZE - 1, world);
 	}
 
 	public static RegionPosition fromChunk(ChunkPosition c) {

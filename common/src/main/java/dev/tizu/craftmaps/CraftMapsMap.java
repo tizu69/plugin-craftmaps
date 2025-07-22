@@ -28,15 +28,16 @@ public class CraftMapsMap {
 		return chunk;
 	}
 
-	public CMChunk[][] getChunks(ChunkPosition pos, int sizeX, int sizeZ) {
-		CMChunk[][] chosen = new CMChunk[sizeX][sizeZ];
+	public CMChunk[] getChunks(ChunkPosition pos, int sizeX, int sizeZ) {
+		CMChunk[] chosen = new CMChunk[sizeX * sizeZ];
 		for (int x = 0; x < sizeX; x++)
 			for (int z = 0; z < sizeZ; z++)
-				chosen[x][z] = getChunk(new ChunkPosition(pos.x() + x, pos.z() + z, pos.world()));
+				chosen[x * sizeZ + z] = getChunk(new ChunkPosition(pos.x() + x,
+						pos.z() + z, pos.world()));
 		return chosen;
 	}
 
-	public CMChunk[][] getRegion(RegionPosition pos) {
+	public CMChunk[] getRegion(RegionPosition pos) {
 		return getChunks(pos.getChunkPositionTL(), RegionPosition.REGION_SIZE,
 				RegionPosition.REGION_SIZE);
 	}

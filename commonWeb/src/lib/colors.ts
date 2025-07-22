@@ -71,13 +71,25 @@ export const colorShades = {
 	1: 1
 };
 
-export const get = (color: BlockColor, shade: ColorShades = 0) => {
-	let shadeMultiplier = colorShades[shade];
-	let unshaded = colors[color];
-
-	return `rgb(${[
-		Math.floor(unshaded[0] * shadeMultiplier),
-		Math.floor(unshaded[1] * shadeMultiplier),
-		Math.floor(unshaded[2] * shadeMultiplier)
+export const getColor = (color: BlockColor, mul: number) =>
+	`rgb(${[
+		Math.floor(colors[color][0] * mul),
+		Math.floor(colors[color][1] * mul),
+		Math.floor(colors[color][2] * mul)
 	].join(',')})`;
+export const getVanilla = (color: BlockColor, shade: ColorShades = 0) => {
+	let shadeMultiplier = colorShades[shade];
+	return getColor(color, shadeMultiplier);
+};
+export const getContour = (color: BlockColor, y: number, modN: number, mulN = 3) => {
+	const shadeMultiplier = 1 - (y % modN) / (mulN * modN);
+	return getColor(color, shadeMultiplier);
+};
+export const getHeightmap = (color: BlockColor, y: number) => {
+	const shade = Math.max(0.5, Math.min(1, (y - 50) / 20));
+	return getColor(color, shade);
+};
+export const getBluemap = (_: BlockColor, y: number) => {
+	const shade = (y - 30) / (100 - 30);
+	return getColor('DIAMOND', shade);
 };

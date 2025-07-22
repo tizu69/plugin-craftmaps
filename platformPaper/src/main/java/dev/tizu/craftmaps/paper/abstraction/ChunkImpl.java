@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.bukkit.Chunk;
 import org.bukkit.Color;
+import org.bukkit.HeightMap;
 
 import dev.tizu.craftmaps.abstraction.CMBlock;
 import dev.tizu.craftmaps.abstraction.CMChunk;
+import dev.tizu.craftmaps.paper.ThisPlugin;
 import dev.tizu.craftmaps.platform.BlockColor;
 import dev.tizu.craftmaps.positions.BlockPosition;
 import dev.tizu.craftmaps.positions.ChunkPosition;
@@ -21,7 +23,8 @@ public class ChunkImpl implements CMChunk {
 		var world = chunk.getWorld();
 		for (int x = 0; x < 16; x++)
 			for (int z = 0; z < 16; z++) {
-				var block = world.getHighestBlockAt(pos.x() * 16 + x, pos.z() * 16 + z);
+				var block = world.getHighestBlockAt(pos.x() * 16 + x, pos.z() * 16 + z,
+						HeightMap.WORLD_SURFACE_WG);
 				var color = getMapColor(block.getBlockData().getMapColor());
 				var id = block.getType().getKey().asString();
 				this.setAt(new BlockPosition(x, z), new CMBlock(id, color, block.getY()));

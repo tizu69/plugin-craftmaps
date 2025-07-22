@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { colors, Map } from '$lib';
+	import { Map } from '$lib';
 </script>
 
-<div class="relative bgc-root m-4 w-fit z-10">
+<div class="relative bgc-root m-4 w-fit z-10 hidden">
 	<div class="flex justify-between pb-3">
 		<p class="text-gray">Chess Chest</p>
-		<div class="size-7" style="background: rgb({colors.get('DIAMOND', 0).join(',')});"></div>
 	</div>
 	<div class="mx-auto grid w-fit grid-cols-8">
 		{#each { length: 8 * 8 } as _, i}
